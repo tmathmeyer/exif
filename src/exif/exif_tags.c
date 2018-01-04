@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include "exif_tags.h"
+#include <exif_tags.h>
 
 
 static char *types[0xFFFF+0x01] = {NULL};

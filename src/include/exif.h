@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <arpa/inet.h>
 
+#include "map.h"
+
 
 #define PROJECT_URL "github.com/tmathmeyer/***"
 
@@ -113,7 +115,6 @@ typedef struct {
 
 // Type -> sizeof conversion array
 #define IdfDataFormatMax (13)
-uint8_t IdfDataFormat[IdfDataFormatMax] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 
 
 
@@ -126,4 +127,26 @@ typedef struct {
   char xml[0]; // why tho
 } __attribute__((packed, scalar_storage_order("big-endian"))) XapHeader;
 
+
+
+
+
+
+
+
+// exported functions and structs
+#define TYPE_VALUE 0
+#define TYPE_REFERENCE 1
+typedef struct {
+  uint8_t e_size;
+  uint8_t e_count;
+  uint8_t type;
+  union {
+    void *ref;
+    uint32_t value;
+  };
+} tabledata;
+
+map_t jpeg_data_parse(void *mm);
+void *mmap_image(char *filename);
 #endif

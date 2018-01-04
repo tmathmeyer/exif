@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "map.h"
+#include <map.h>
 
 
 #define MAP_MISSING -3  /* No such element */
