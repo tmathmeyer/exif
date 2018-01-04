@@ -46,14 +46,13 @@ typedef struct {
 +--------+--------+--------+--------+--------+--------+--------+--------+
 */
 typedef struct {
-	AppHeader header;
+  AppHeader header;
   uint16_t _fixed_ZERO_2B;
   uint8_t OFFSET_POINT[0]; // for using as an address
-	uint16_t _fixed_TIFF_BYTE_ALIGN_MOTOR;
-	uint16_t _fixed_TIFF_STATIC_2A;
-	uint32_t IDF0_offset;
+  uint16_t _fixed_TIFF_BYTE_ALIGN_MOTOR;
+  uint16_t _fixed_TIFF_STATIC_2A;
+  uint32_t IDF0_offset;
 } __attribute__((packed, scalar_storage_order("big-endian"))) ExifHeader;
-
 
 typedef struct {
   uint16_t _fixed_JPEG_SOI;

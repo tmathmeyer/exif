@@ -72,17 +72,24 @@ void parse_table(map_t result, uint32_t table_offset, void *offset_base) {
 
 void parse_exif(ExifHeader *exif, map_t map) {
 	check_struct(*exif, ZERO_2B);
+	/* ensure the jpeg is in intel syntax */
 	check_struct(*exif, TIFF_BYTE_ALIGN_MOTOR);
 	check_struct(*exif, TIFF_STATIC_2A);
 	parse_table(map, exif->IDF0_offset, exif->OFFSET_POINT);
 }
 
 void parse_xap(XapHeader *xap, map_t map) {
-	//TODO parse XML instead of spewing.
 	size_t xmllen = xap->header.size - sizeof(XapHeader);
-	char xml[xmllen];
+	char *xml = calloc(xmllen, sizeof(char));
 	strncpy(xml, (char *)&xap->xml, xmllen);
-	printf("%s\n", xml);
+
+	tabledata *td = malloc(sizeof(tabledata));
+	td->type = TYPE_REFERENCE;
+	td->e_size = 1;
+	td->e_count = xmllen;
+	td->ref = xml;
+
+	hashmap_put(map, "XapXml", td);
 }
 
 size_t app_parse(AppHeader *header, map_t recovered) {
@@ -149,6 +156,8 @@ void do_image(char *image) {
 int main() {
 	tag_init();
 	do_image("/home/ted/Downloads/pano.jpg");
+	printf("\n\n==============================\n\n\n");
+	do_image("/home/ted/Downloads/IMG_20161028_165237.jpg");
 	printf("\n\n==============================\n\n\n");
 	do_image("/home/ted/gallery/.images/album/GOPR0617.JPG");
 }
