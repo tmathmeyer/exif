@@ -11,8 +11,9 @@
 #define JPEG_SOI (0xFFD8)
 #define JPEG_EOI (0xFFD9)
 
-#define EXIF_APP1 (0xFFE1)
-#define EXIF_APP1_MARKER (0x45786966)
+#define APP1_MARKER (0xFFE1)
+#define EXIF_MARKER (0x45786966)
+#define XAP_MARKER (0x68747470)
 
 #define TIFF_BYTE_ALIGN_INTEL (0x4949) // JPEG does _not_ allow this nonsense.
 #define TIFF_BYTE_ALIGN_MOTOR (0x4D4D)
@@ -27,6 +28,14 @@
 } while(0)
 
 
+
+typedef struct {
+  uint16_t _fixed_APP1_MARKER;
+  uint16_t size;
+  uint32_t marker;
+} __attribute__((packed, scalar_storage_order("big-endian"))) AppHeader;
+
+
 /* EXIF FORMAT (JPG)
 +--------+--------+--------+--------+--------+--------+--------+--------+
 |        |        |        |        |        |        |   FF   |   E1   |
@@ -37,9 +46,7 @@
 +--------+--------+--------+--------+--------+--------+--------+--------+
 */
 typedef struct {
-	uint16_t _fixed_EXIF_APP1;
-	uint16_t app1_size;
-	uint32_t _fixed_EXIF_APP1_MARKER;
+	AppHeader header;
   uint16_t _fixed_ZERO_2B;
   uint8_t OFFSET_POINT[0]; // for using as an address
 	uint16_t _fixed_TIFF_BYTE_ALIGN_MOTOR;
@@ -50,7 +57,7 @@ typedef struct {
 
 typedef struct {
   uint16_t _fixed_JPEG_SOI;
-  ExifHeader exif;
+  AppHeader header;
 } __attribute__((packed, scalar_storage_order("big-endian"))) JpegHeader;
 
 
@@ -115,9 +122,8 @@ uint8_t IdfDataFormat[IdfDataFormatMax] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8
 
 /*XAP format (literally just a stupid xml string)*/
 typedef struct {
-  uint16_t _fixed_EXIF_APP1;
-  uint16_t app1_size;
-  char broken_link[29]; // Thanks Adobe...
+  AppHeader header;
+  char broken_link[25]; // Thanks Adobe...
   char xml[0]; // why tho
 } __attribute__((packed, scalar_storage_order("big-endian"))) XapHeader;
 

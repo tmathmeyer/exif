@@ -70,16 +70,35 @@ void parse_table(map_t result, uint32_t table_offset, void *offset_base) {
 	}
 }
 
-size_t app_parse(ExifHeader *exif, map_t map) {
-	check_struct(*exif, EXIF_APP1);
-	check_struct(*exif, EXIF_APP1_MARKER); // TODO replace this.
+void parse_exif(ExifHeader *exif, map_t map) {
 	check_struct(*exif, ZERO_2B);
 	check_struct(*exif, TIFF_BYTE_ALIGN_MOTOR);
 	check_struct(*exif, TIFF_STATIC_2A);
 	parse_table(map, exif->IDF0_offset, exif->OFFSET_POINT);
+}
 
-	// Add 2 to account for the ffe1 garbage not being part of the size.
-	return (size_t)((void*)exif + exif->app1_size + 2);
+void parse_xap(XapHeader *xap, map_t map) {
+	//TODO parse XML instead of spewing.
+	size_t xmllen = xap->header.size - sizeof(XapHeader);
+	char xml[xmllen];
+	strncpy(xml, (char *)&xap->xml, xmllen);
+	printf("%s\n", xml);
+}
+
+size_t app_parse(AppHeader *header, map_t recovered) {
+	//check_struct(*header, APP1_MARKER); // Better way to do this
+	switch(header->marker) {
+		case EXIF_MARKER:
+			parse_exif((ExifHeader *)header, recovered);
+			break;
+		case XAP_MARKER:
+			parse_xap((XapHeader *)header, recovered);
+			break;
+		default:
+			return 0;
+	}
+
+	return (((size_t)header) + header->size + 2);
 }
 
 map_t jpeg_data_parse(void *mm) {
@@ -91,20 +110,13 @@ map_t jpeg_data_parse(void *mm) {
 		return NULL;
 	}
 
-	size_t first_app_offset = app_parse(&jpeg->exif, result);
-	//printf("%x\n", *((uint16_t *)first_app_offset));
-
-	XapHeader *e2 = (XapHeader *)first_app_offset;
-	size_t second_app_offset = (size_t)((void *)e2 + e2->app1_size + 2);
-	//printf("%x\n", *((uint16_t *)second_app_offset));
-
-	size_t xmllen = second_app_offset - first_app_offset - sizeof(XapHeader) - 2;
-	char xml[xmllen];
-	strncpy(xml, (char *)&e2->xml, xmllen);
-	printf("%s\n", xml);
+	AppHeader *header = &jpeg->header;
+	do {
+		size_t app_offset = app_parse(header, result);
+		header = (AppHeader *)app_offset;
+	} while(header);
 
 	return result;
-
 }
 
 void *mmap_file(char *filename) {
@@ -136,7 +148,7 @@ void do_image(char *image) {
 
 int main() {
 	tag_init();
-	do_image("/home/ted/Downloads/pp.jpg");
+	do_image("/home/ted/Downloads/pano.jpg");
 	printf("\n\n==============================\n\n\n");
 	do_image("/home/ted/gallery/.images/album/GOPR0617.JPG");
 }
