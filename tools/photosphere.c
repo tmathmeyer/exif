@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <exif_tags.h>
-#include <exif.h>
-#include <map.h>
+#include "exif/lib/include/exif_tags.h"
+#include "exif/lib/include/exif.h"
+#include "exif/lib/include/map.h"
 
 #define ERR_NO_FILE 1
 #define NOT_PHOTOSPHERE 2

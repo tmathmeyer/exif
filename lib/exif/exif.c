@@ -7,9 +7,9 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-#include <map.h>
-#include <exif.h>
-#include <exif_tags.h>
+#include "exif/lib/include/map.h"
+#include "exif/lib/include/exif.h"
+#include "exif/lib/include/exif_tags.h"
 
 #define errstr (strerror(errno))
 
